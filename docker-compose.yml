@@ -1,0 +1,26 @@
+services:
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: pki-sidecar-nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /home/matt/.pki:/etc/nginx/certs:ro
+    networks:
+      - pki-network
+    # No ports exposed to host - only accessible within docker network
+    restart: unless-stopped
+
+  goose:
+    image: goose/dev
+    container_name: pki-sidecar-goose
+    volumes:
+      - /home/matt:/home/matt
+    networks:
+      - pki-network
+    depends_on:
+      - nginx-proxy
+    restart: unless-stopped
+
+networks:
+  pki-network:
+    driver: bridge
